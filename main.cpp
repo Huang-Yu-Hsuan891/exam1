@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "uLCD_4DGL.h"
 
+EventQueue queue(32 * EVENTS_EVENT_SIZE);
 uLCD_4DGL uLCD(D1, D0, D2);
 void print (int slew1);
 InterruptIn button(D5);
@@ -8,7 +9,7 @@ AnalogOut  aout(D7);
 AnalogIn Ain(A0);
 float i;
 int startq;
-int j;
+
 void flip()
 {
    startq = 1;
@@ -32,9 +33,17 @@ private:
 };
 Counter counter(D3);
 Counter counter1(D4);
-/*int j;
+
+int j;
 int sample = 128;
-float ADCdata[128];*/
+float ADCdata[128];
+void dataprint() {
+   for (i = 0; i < sample; i++) {
+   printf("%f\r\n",ADCdata[j]);
+   ThisThread::sleep_for(100ms);
+   }
+}
+
 int main()
 {   
     int sum;
@@ -60,15 +69,6 @@ int main()
     }
 
     while (startq) {
-       /* for (i = 0.0; i < (0.08 - 0.08 * slew); i += (0.08 - 0.08 * slew) / 10) {
-            aout = i / (0.08 - 0.08 * slew);
-        }
-        for (i = (0.08 - 0.08 * slew); i < (0.24 - 0.08 * slew); i += (0.08 - 0.08 * slew) / 10) {
-            aout = 1.0;
-        }
-        for (i = (0.24 - 0.08 * slew); i < 0.24; i += (0.08 - 0.08 * slew) / 10) {
-            aout = 1 - (i - (0.24 - 0.08 * slew)) / (0.08 - 0.08 * slew);
-        }*/
         if (slew == 1) {
         for (i = 0.0; i < 0.08 ; i += 0.08 / 5) {
             aout = i / 0.08;
@@ -98,16 +98,11 @@ int main()
         }
         }
         for (j = 0; j < 128; j++) {
-            ADCdata[j] = Ain
+            ADCdata[j] = Ain;
         }
+        queue.call(dataprint);
 
     }  
-    /*for (i = 0.0, j = 0;Fre !=1 && j < 128 && i < 1.0/ Fre; j += 1, i +=1.0/128) {
-        aout = i * Fre;
-            ThisThread::sleep_for(1000ms/( 128 * Fre ));
-            ADCdata[j] = Ain;
-            printf("%f\r\n", ADCdata[j]); 
-        }*/
 }
 void print (int slew1) {
     uLCD.cls();
